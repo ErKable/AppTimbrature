@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from './ClockComponent.module.css'
 
-export default function ClockComponent({isMobile}) {
+export default function ClockComponent() {
   const [date, setDate] = useState(new Date());
   let interval;
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function ClockComponent({isMobile}) {
     return val;
   };
   return (
-    <div className={`${styles.date} ${!isMobile ? styles.desktop :  ""}`}>
+    <div className={styles.date}>
       <p>{`${date.getHours()} : ${format(date.getMinutes())} : 
       ${format(date.getSeconds())}`}</p>
     </div>

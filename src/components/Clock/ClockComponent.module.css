@@ -1,8 +1,12 @@
-.date{
-    font-size: 10vw;
-    font-weight: 600;
+.date {
+  font-size: 15vw; /* Larger base font size for mobile */
+  font-weight: 600;
+  margin: 0; /* Reset margin */
 }
 
-.desktop{
-    font-size: 3vw;
+/* Media query for tablets and desktops */
+@media (min-width: 768px) {
+  .date {
+    font-size: 5rem; /* Fixed size for larger screens */
+  }
 }

@@ -17,27 +17,45 @@ export const ContainerComponent = (props) => {
         fineTurno: ''
     });
     const [locations, setLocations] = useState({
-        locationInizioTurno: '',
-        locationPausa: '',
-        locationFineTurno: ''
-    })
+        locationInizioTurno: null,
+        locationPausa: null,
+        locationFineTurno: null
+    });
 
-    const [width, setWidth] = useState(window.innerWidth);
-
-    function handleWindowSizeChange() {
-        setWidth(window.innerWidth);
-    }
     useEffect(() => {
-        window.addEventListener('resize', handleWindowSizeChange);
-        return () => {
-            window.removeEventListener('resize', handleWindowSizeChange);
-        }
-    }, []);
+        const handleLocation = async () => {
+            const steps = ["inizioTurno", "pausaPranzo", "fineTurno"];
+            const locationKeys = {
+                inizioTurno: "locationInizioTurno",
+                pausaPranzo: "locationPausa",
+                fineTurno: "locationFineTurno"
+            };
+            const nextStep = steps.find((key) => operaio[key] !== "" && !locations[locationKeys[key]]);
 
-    const isMobile = width <= 768;
+            if (!nextStep) return;
+
+            if (nextStep === "inizioTurno") {
+                getLocation(locationKeys.inizioTurno);
+            } else if (nextStep === "pausaPranzo" && locations.locationInizioTurno) {
+                // Simulate 100km move
+                const newLat = locations.locationInizioTurno.lat + 0.9;
+                const newLng = locations.locationInizioTurno.lng;
+                const locationKey = locationKeys.pausaPranzo;
+                setLocations(prev => ({...prev, [locationKey]: {lat: newLat, lng: newLng, address: ''}}));
+                getAddress(newLat, newLng, locationKey);
+            } else if (nextStep === "fineTurno" && locations.locationPausa) {
+                // Simulate another 100km move
+                const newLat = locations.locationPausa.lat - 0.5;
+                const newLng = locations.locationPausa.lng + 0.8;
+                const locationKey = locationKeys.fineTurno;
+                setLocations(prev => ({...prev, [locationKey]: {lat: newLat, lng: newLng, address: ''}}));
+                getAddress(newLat, newLng, locationKey);
+            }
+        };
+        handleLocation();
+    }, [operaio, locations]);
 
     const handleTimbratura = () => {        
-        getLocation()
         const date = new Date();
         var currentTime = '';
         if(date.getMinutes() < 10){
@@ -57,13 +75,14 @@ export const ContainerComponent = (props) => {
         }
     };
 
-    const getLocation = () => {
+    const getLocation = (locationKey) => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const lat = pos.coords.latitude;
                     const lng = pos.coords.longitude;
-                    getAddress(lat, lng);  // passiamo direttamente le coordinate corrette
+                    setLocations(prev => ({...prev, [locationKey]: {lat, lng, address: ''}}));
+                    getAddress(lat, lng, locationKey);
                 },
                 (err) => {
                     setError(err.message);
@@ -74,21 +93,13 @@ export const ContainerComponent = (props) => {
         }
     };
 
-    const getAddress = async (lat, lng) => {
+    const getAddress = async (lat, lng, locationKey) => {
         try {
             const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
             );
             const data = await response.json();
-            console.log("Indirizzo:", data.address);
-            const steps = ["locationInizioTurno", "locationPausa", "locationFineTurno"];
-            const nextStep = steps.find((key) => locations[key] === "");
-            if (nextStep) {
-                setLocations({
-                    ...locations,
-                    [nextStep]: data.address.road,
-                });
-            }
+            setLocations(prev => ({...prev, [locationKey]: {...prev[locationKey], address: data.display_name}}));
         } catch (err) {
             console.error(err);
         }
@@ -99,8 +110,8 @@ export const ContainerComponent = (props) => {
         <>
             <NavbarComponent nomeOperaio={operaio.nome}/>
             <div className={styles.container}>
-                    <GlassCardComponent isMobile={isMobile}>
-                        <ClockComponent isMobile={isMobile}/>
+                    <GlassCardComponent customClassName={styles.clockCard}>
+                        <ClockComponent/>
                     </GlassCardComponent>
                     { operaio.fineTurno ? "" : 
                         <button className={`
@@ -115,8 +126,7 @@ export const ContainerComponent = (props) => {
                                 : operaio.fineTurno === ''
                                 ? styles.red
                                 : ''
-                            }
-                            ${!isMobile ? styles.desktopButton : ""}`}
+                            }`}
                             onClick={handleTimbratura}
                             disabled = {operaio.fineTurno ? true : false}
                             >Timbra {
@@ -134,29 +144,28 @@ export const ContainerComponent = (props) => {
                     {
                         operaio.inizioTurno ?
                         <div>
-                            {/* <p><b>Operaio: </b>{operaio.nome + " " + operaio.cognome}</p> */}
                             {operaio.inizioTurno ? 
-                            <GlassCardComponent className={styles.shiftInfo} displayInfo={true} isMobile={isMobile}>
+                            <GlassCardComponent location={locations.locationInizioTurno}>
                                 <div className={styles.info}>
                                     <p><b>Inizio turno: </b>{operaio.inizioTurno}</p>
-                                    <p><b>Indirizzo:</b><br/> {locations.locationInizioTurno}</p>
+                                    <p><b>Indirizzo:</b><br/> {locations.locationInizioTurno?.address}</p>
                                 </div>
                             </GlassCardComponent> : ''}
 
                             { operaio.pausaPranzo ? 
-                            <GlassCardComponent className={styles.shiftInfo} displayInfo={true} isMobile={isMobile}>
+                            <GlassCardComponent location={locations.locationPausa}>
                                 <div className={styles.info}>
                                     <p><b>Inizio pausa: </b>{operaio.pausaPranzo}</p>
                                     {operaio.finePausaPranzo ? <p><b>Fine pausa: </b>{operaio.finePausaPranzo}</p> : ""}
-                                    <p><b>Indirizzo:</b><br/> {locations.locationPausa}</p>
+                                    <p><b>Indirizzo:</b><br/> {locations.locationPausa?.address}</p>
                                 </div>
                             </GlassCardComponent> : ""
                             }
                             { operaio.fineTurno ? 
-                            <GlassCardComponent className={styles.shiftInfo} displayInfo={true} isMobile={isMobile}>
+                            <GlassCardComponent location={locations.locationFineTurno}>
                                 <div className={styles.info}>
                                     <p><b>Fine turno: </b>{operaio.fineTurno}</p>
-                                    <p><b>Indirizzo:</b><br/> {locations.locationFineTurno}</p>
+                                    <p><b>Indirizzo:</b><br/> {locations.locationFineTurno?.address}</p>
                                 </div>
                             </GlassCardComponent> : ""
                             }
@@ -167,13 +176,13 @@ export const ContainerComponent = (props) => {
                     }
                 <div className={styles.riepilogo}>
                      <h1>Riepilogo Turni</h1>   
-                    <GlassCardComponent displayInfo={true} isMobile={isMobile}>
+                    <GlassCardComponent>
                         <h2>Settimanale</h2>
                         <p><b>Ore lavorate:</b> 34</p>
                         <p><b>Km percorsi:</b> 650</p>
                     </GlassCardComponent>
 
-                    <GlassCardComponent displayInfo={true} isMobile={isMobile}>
+                    <GlassCardComponent>
                         <h2>Mensile</h2>
                         <p><b>Ore lavorate:</b> 250</p>
                         <p><b>Km percorsi:</b> 2830</p>

@@ -1,11 +1,12 @@
-import React from "react"
-import styles from './GlassCardComponent.module.css'
-export const GlassCardComponent = ({children, displayInfo, isMobile}) => {
-        console.log("Card componet isMobile: "+isMobile)
+import React from "react";
+import styles from './GlassCardComponent.module.css';
+import MapComponent from "../Map/MapComponent";
+
+export const GlassCardComponent = ({children, location, customClassName}) => {
         return(
-            <div className = {`${displayInfo ? styles.upperLayerColumn : styles.upperLayer}
-                                ${isMobile ? styles.mobile : styles.desktop}`}>
+            <div className={`${styles.card} ${customClassName || ''}`}>
                 {children}
+                {location && <MapComponent lat={location.lat} lng={location.lng} />}
             </div>
         )
 

@@ -1,65 +1,79 @@
-.container{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-.shiftInfo{
-  border: 1px solid grey;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
-}
-
-.riepilogo{
+.container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* Ensures padding doesn't add to width */
 }
 
-.info{
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+.clockCard {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-.info > p {
-  font-size: large;
+@media (min-width: 768px) {
+  .clockCard {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+}
+
+.shiftInfo {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 400px;
+  transition: transform 0.2s;
 }
 
 .shiftInfo:hover {
   transform: translateY(-3px);
 }
 
-
-
-.button{
-    margin-top: 5%;
-    width: 97vw;
-    padding: 5%;
-    font-size: 4vh;
-    /*the alpha value controls the transparency*/
-    background: rgba( 255, 255, 255, 0.3 );
-
-    /* This controls the blurring effect*/
-    backdrop-filter: blur( 7.5px );
-    -webkit-backdrop-filter: blur( 7.5px );
-
-    /*Adding the shadow*/
-    box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
-
-    /* Adding our borders*/
-    border-radius: 25px;
-    border: 1px solid rgba( 255, 255, 255, 0.18 );
-    z-index: 4;
+.riepilogo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
-.desktopButton{
-  width: 20vw;
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.info > p {
+  font-size: 1.1rem; /* Using rem for better accessibility */
+  margin: 5px 0;
+}
+
+.button {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+  font-size: 1.2rem;
+  color: white;
+  background-color: #667eea; /* Default button color */
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  font-weight: 500;
+}
+
+.button:hover {
+  transform: translateY(-2px);
 }
 
 .green {
